@@ -9,9 +9,9 @@ var connection = mysql.createConnection({
   database: "bamazon"
 });
 
+// console.log("BAM!azon");
 connection.connect((err) => {
   if(err) throw err;
-  // console.log("BAM!azon");
 });
 
 function prompt(question) {
@@ -27,7 +27,6 @@ var init = function() {
   };
 
   prompt(identityQ).then((answer) => {
-    // console.log('answer', answer);
     switch(answer.user) {
       case 'potential customer--be nice to me!':
         getProducts();
@@ -74,28 +73,24 @@ function askQuantity(item_id) {
   })
 }
 
-// Christoph's Law of Functions:
-// The entire function call gets replaced by the return value
-
 function checkProductAvailability(itemId, quantity) {
-  // console.log("this is the item id: ", itemId, " and the quantity: ", quantity);
   connection.query('SELECT quantity FROM products WHERE id = ' + itemId, function(err, res) {
     if (err) throw err;
     if (quantity > res) {
       console.log("I don't have that many to sell to you!");
       askQuantity();
     } else {
-      console.log('this is the users quantity request: ', res);
+      console.log('this is the users quantity in the db: ', res[0].quantity);
       console.log('quantity: ', quantity);
-      var newQuantity = res - quantity;
+      var newQuantity = res[0].quantity - quantity;
       console.log('new db quantity: ', newQuantity);
-      // connection.query('UPDATE products SET ? WHERE ?',
-      //   [{
-      //     quantity: newQuantity
-      //   }, {
-      //     id: itemId
-      //   }]
-      // )
+      connection.query('UPDATE products SET ? WHERE ?',
+        [{
+          quantity: newQuantity
+        }, {
+          id: itemId
+        }]
+      )
     }
   })
   var item = allProductInfo.filter(function(item) {
